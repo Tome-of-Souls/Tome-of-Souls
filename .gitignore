@@ -1,0 +1,7 @@
+node_modules/
+build/
+build-staging/
+*.log
+.env
+.DS_Store
+certbot/

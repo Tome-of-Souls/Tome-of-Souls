@@ -1,0 +1,40 @@
+version '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/build:/usr/share/nginx/html:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - backend-staging
+    restart: unless-stopped
+    networks:
+      - staging
+
+  backend:
+    build: ./backend
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=staging
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - staging
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend/build:/app/build
+    networks:
+      - staging
+
+networks:
+  staging:
+    driver: bridge
