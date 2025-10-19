@@ -7,34 +7,76 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./frontend/build:/usr/share/nginx/html:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/build-staging:/usr/share/nginx/html:ro
     depends_on:
       - backend-staging
     restart: unless-stopped
+
+  frontend-staging:
+    build: ./frontend
+    volumes:
+      - ./frontend/build-staging:/app/build
     networks:
       - staging
 
-  backend:
+  backend-staging:
     build: ./backend
     expose:
       - "3000"
     environment:
       - NODE_ENV=staging
       - PORT=3000
+      - AUTH_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD_STAGING}@db-auth-staging:5432/tomeofsouls_auth_staging
+      - CHAR_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD_STAGING}@db-char-staging:5432/tomeofsouls_char_staging
+      _ SHEET_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD_STAGING}@db-sheet-staging:5432/tomeofsouls_sheet_staging
+    depends_on:
+      - db-auth-staging
+      - db-char-staging
+      _ db-sheet-staging
+    restart: unless-stopped
+
+  db-auth:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_STAGING}
+      - POSTGRES_DB=tomeofsouls_auth_staging
+    volumes:
+      - postgres_auth_data_staging:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - staging
 
-  frontend:
-    build: ./frontend
+  db-char-staging:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_STAGING}
+      - POSTGRES_DB=tomeofsouls_char_staging
     volumes:
-      - ./frontend/build:/app/build
+      - postgres_char_data_staging:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - staging
+
+  db-sheet-staging:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_STAGING}
+      - POSTGRES_DB=tomeofsouls_sheet_staging
+    volumes:
+      - postgres_sheet_data_staging:/var/lib/postgresql/data
+    restart: unless-stopped
     networks:
       - staging
 
 networks:
   staging:
     driver: bridge
+
+volumes:
+  postgres_auth_data_staging:
+  postgres_char_data_staging:
+  postgres_sheet_data_staging:
