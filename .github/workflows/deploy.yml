@@ -25,6 +25,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/github_deploy
             cd /opt/app
             git pull origin main
             docker compose down
@@ -39,6 +41,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/github_deploy
             cd /opt/app
             git pull origin staging
             docker compose -f docker-compose.staging.yml down
