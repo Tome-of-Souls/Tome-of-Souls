@@ -5,3 +5,5 @@ build-staging/
 .env
 .DS_Store
 certbot/
+.idea
+frontend/.idea
