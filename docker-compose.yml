@@ -1,4 +1,4 @@
-version '3.8'
+version: '3.8'
 
 services:
   nginx:
@@ -29,11 +29,11 @@ services:
       - PORT=3000
       - AUTH_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_auth
       - CHAR_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_char
-      _ SHEET_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_sheet
+      - SHEET_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_sheet
     depends_on:
       - db-auth
       - db-char
-      _ db-sheet
+      - db-sheet
     restart: unless-stopped
 
   db-auth:
