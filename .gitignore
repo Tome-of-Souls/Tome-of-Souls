@@ -6,4 +6,4 @@ build-staging/
 .DS_Store
 certbot/
 .idea
-fronte/.idea
+frontend/.idea

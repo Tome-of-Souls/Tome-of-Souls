@@ -13,6 +13,11 @@ services:
       - backend
     restart: unless-stopped
 
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend/build:/app/build
+
   backend:
     build: ./backend
     expose:
@@ -20,9 +25,46 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - AUTH_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_auth
+      - CHAR_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_char
+      - SHEET_DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/tomeofsouls_sheet
+    depends_on:
+      - db-auth
+      - db-char
+      - db-sheet
     restart: unless-stopped
 
-  frontend:
-    build: ./frontend
+  db-auth:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tomeofsouls_auth
     volumes:
-      - ./frontend/build:/app/build
+      - postgres_auth_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  db-char:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tomeofsouls_char
+    volumes:
+      - postgres_char_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  db-sheet:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tomeofsouls_sheet
+    volumes:
+      - postgres_sheet_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_auth_data:
+  postgres_char_data:
+  postgres_sheet_data:
